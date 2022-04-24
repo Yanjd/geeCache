@@ -2,7 +2,7 @@ package lru
 
 import "container/list"
 
-type cache struct {
+type Cache struct {
 	maxBytes        int64
 	curBytes        int64
 	linkList        *list.List
@@ -19,8 +19,8 @@ type Value interface {
 	Len() int
 }
 
-func NewCache(maxBytes int64, onRemoved func(string, Value)) *cache {
-	return &cache{
+func NewCache(maxBytes int64, onRemoved func(string, Value)) *Cache {
+	return &Cache{
 		maxBytes:        maxBytes,
 		onRemoveHandler: onRemoved,
 		linkList:        list.New(),
@@ -28,7 +28,7 @@ func NewCache(maxBytes int64, onRemoved func(string, Value)) *cache {
 	}
 }
 
-func (c *cache) Set(key string, value Value) {
+func (c *Cache) Set(key string, value Value) {
 	if v, ok := c.data[key]; ok {
 		oldLen := v.Value.(*entry).value.Len()
 		c.linkList.MoveToFront(v)
@@ -48,7 +48,7 @@ func (c *cache) Set(key string, value Value) {
 	}
 }
 
-func (c *cache) RemoveFurthest() {
+func (c *Cache) RemoveFurthest() {
 	v := c.linkList.Back()
 	if v != nil {
 		c.linkList.Remove(v)
@@ -61,7 +61,7 @@ func (c *cache) RemoveFurthest() {
 	}
 }
 
-func (c *cache) Get(key string) (value Value, ok bool) {
+func (c *Cache) Get(key string) (value Value, ok bool) {
 	if v, ok := c.data[key]; ok {
 		c.linkList.MoveToFront(v)
 		e := v.Value.(*entry)
@@ -70,6 +70,6 @@ func (c *cache) Get(key string) (value Value, ok bool) {
 	return
 }
 
-func (c *cache) Len() int {
+func (c *Cache) Len() int {
 	return c.linkList.Len()
 }
